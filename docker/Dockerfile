@@ -28,8 +28,8 @@ RUN curl -f -L https://static.rust-lang.org/rustup.sh -O \
     && sh rustup.sh -y
 ENV PATH="$PATH:/root/.cargo/bin"
 
-RUN git clone https://github.com/casper-network/casper-node-launcher.git \
-    && git clone https://github.com/casper-network/cctl.git
+RUN git clone https://github.com/casper-network/casper-node-launcher.git
+COPY . cctl/.
 RUN if [ -n "$NODE_COMMIT" ]; then \
         git clone -b $NODE_COMMIT $NODE_REPO; \
     else \
@@ -47,10 +47,10 @@ RUN make setup-rs && echo '. /cctl/activate' >> ~/.bashrc
 
 WORKDIR /
 
-COPY ./build.sh .
+COPY ./docker/build.sh .
 RUN chmod +x build.sh && source build.sh
 
-COPY ./clean.sh .
+COPY ./docker/clean.sh .
 RUN chmod +x clean.sh && source clean.sh
 
 FROM debian:buster as run
@@ -58,8 +58,9 @@ FROM debian:buster as run
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 RUN apt-get update \
-      && apt-get install -y sudo curl git ca-certificates jq supervisor lsof python3 python3-pip python3-toml \
-      && rm -rf /var/lib/apt/lists/*
+    && apt-get install -y sudo curl git ca-certificates jq supervisor lsof python3 python3-pip \
+    && pip3 install pytz pytoml toml \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN useradd -ms /bin/bash cctl && echo "cctl:cctl" | chpasswd && adduser cctl sudo
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
@@ -77,7 +78,7 @@ ENV CCTL="/home/cctl/cctl"
 
 RUN echo "source $CCTL/activate" >> .bashrc
 
-COPY --chown=cctl:cctl ./start.sh .
+COPY --chown=cctl:cctl ./docker/start.sh .
 RUN chmod +x start.sh
 
 EXPOSE 11101-11105 14101-14105 18101-18105

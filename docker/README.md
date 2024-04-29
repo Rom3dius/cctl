@@ -8,10 +8,11 @@ After starting docker on your machine follow these simple instructions:
 
 Build and run using `docker build` or `docker compose`:
 ```bash
-git clone git@github.com:casper-network/cctl.git && cd cctl/docker
+git clone git@github.com:casper-network/cctl.git
 
-docker build . --build-arg NODE_GITBRANCH=release-1.5.6 --build-arg CLIENT_GITBRANCH=release-2.0.0 -t cspr-cctl/release-1.5.6
+docker build . --build-arg NODE_GITBRANCH=release-1.5.6 --build-arg CLIENT_GITBRANCH=release-2.0.0 -t cspr-cctl/release-1.5.6 -f docker/Dockerfile
 # or
+cd docker
 docker compose up # optional: -d argument detaches it from terminal
 ```
 
